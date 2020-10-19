@@ -55,15 +55,13 @@ class IndentionTester(Node):
         self.pub_target_air_pressure.publish(msg)
 
     def update(self):
-        home_position = [58, 137, 1] 
-        just_position = [58, 137, 80]
-        indent_position = [58, 137, 85]
+        home_position = [130, 83, 80]
+        indent_position = [130, 83, 85]
         self.get_logger().info('on update')
         if self.count % 2 == 0:
             self.req.xyz_goal = home_position
         else:
             self.req.xyz_goal = indent_position
-        # self.req.xyz_goal = indent_position
         self.get_logger().info(f'Send xyz_goal : {self.req.xyz_goal}')
         response = self.request_service_sync(
             self.cli_ttac3, self.req)
@@ -89,7 +87,6 @@ def main(args=sys.argv):
     indention_tester = IndentionTester()
     indention_tester.main_thread.start()
     rclpy.spin(indention_tester)
-
 
 if __name__ == '__main__':
     main()
