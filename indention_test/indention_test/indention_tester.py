@@ -57,7 +57,7 @@ class IndentionTester(Node):
     def update(self):
         home_position = [130, 83, 80]
         indent_position = [130, 83, 85]
-        self.get_logger().info('on update')
+        # self.get_logger().info('on update')
         if self.count % 2 == 0:
             self.req.xyz_goal = home_position
         else:
