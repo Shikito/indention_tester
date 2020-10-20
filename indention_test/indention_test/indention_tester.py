@@ -10,8 +10,6 @@ from ttac3_interfaces.srv import TTAC3
 # from indention_test_utils.ttac3_client_node import TTAC3ClientNode
 from yi2016_utils.node_utils import create_thread
 
-
-
 class IndentionTester(Node):
     def __init__(self):
         super().__init__('indention_tester')
