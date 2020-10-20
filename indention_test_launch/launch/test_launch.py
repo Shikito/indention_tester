@@ -18,5 +18,23 @@ def generate_launch_description():
                 '-b', '115200',
                 '-n', 'bend_sensor'
             ]
+        ),
+        launch.actions.ExecuteProcess(
+            cmd=[
+                'ros2', 'run', 'ros2serial', 'main',
+                '-p', '/dev/ttyACM1',
+                '-b', '115200',
+                '-n', 'terminal'
+            ]
+        ),
+        launch.actions.ExecuteProcess(
+            cmd=[
+                'ros2', 'run', 'mf_driver', 'bend_sensor_driver'
+            ]
+        ),
+        launch.actions.ExecuteProcess(
+            cmd=[
+                'ros2', 'run', 'mf_driver', 'terminal_driver'
+            ]
         )
     ])
