@@ -5,9 +5,12 @@ from rclpy.node import Node
 from rclpy.action import ActionClient
 
 from std_msgs.msg import Float32
+from std_msgs.msg import Int32MultiArray
 from ttac3_interfaces.srv import TTAC3
 # from indention_test_utils.ttac3_client_node import TTAC3ClientNode
 from yi2016_utils.node_utils import create_thread
+
+
 
 class IndentionTester(Node):
     def __init__(self):
@@ -57,6 +60,7 @@ class IndentionTester(Node):
     def update(self):
         home_position = [130, 83, 80]
         indent_position = [130, 83, 85]
+        
         # self.get_logger().info('on update')
         if self.count % 2 == 0:
             self.req.xyz_goal = home_position
