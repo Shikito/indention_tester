@@ -47,15 +47,9 @@ def generate_launch_description():
                 'ros2', 'run', 'mf_driver', 'terminal_driver'
             ]
         ),
-        # launch.actions.ExecuteProcess(
-        #     cmd=['ros2', 'bag', 'record',
-        #         '/terminal/int/current_pressure',
-        #         '/terminal/int/target_pressure',
-        #         '/bend_sensor/int',
-        #         '/ttac3_state',
-        #         '--compression-mode', 'file',
-        #         '--compression-format', 'zstd',
-        #         '--output', bag_dir,
-        #         '-b', '1000000']
-        # )
+        launch.actions.ExecuteProcess(
+            cmd=[
+                'ros2', 'run', 'indention_test', 'record_csv', 
+            ]
+        ),
     ])

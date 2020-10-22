@@ -22,6 +22,7 @@ setup(
     entry_points={
         'console_scripts': [
             'tester = ' + package_name + '.indention_tester:main',
+            'record_csv = ' + package_name + '.record_csv:main',
         ],
     },
 )

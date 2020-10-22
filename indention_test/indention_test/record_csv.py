@@ -1,4 +1,5 @@
 import os
+from time import time
 from pathlib import Path
 from datetime import datetime as dt
 
@@ -18,10 +19,11 @@ class RecordCSV(Node):
         tdatetime = dt.now()
         tstr = tdatetime.strftime('%Y%m%d%H%M%S')
         self.csv_dir_name = f'/home/toshi/dev_ws/csv/indention_test/{tstr}'
-        Path.mkdir(self.csv_dir_name, exist_ok=True)
+        Path(self.csv_dir_name).mkdir(parents=True)
+        self.start_time = time()
         self.csv_column_count = 0
         self.csv_max_column = 1000
-        self.csv_file_number = 0
+        self.csv_file_number = -1
 
         self.bend_sensor_value = None
         self.target_pressure_value = None
@@ -72,6 +74,15 @@ class RecordCSV(Node):
         self.ttac3_state = msg.data
 
     def callback_write_csv(self):
+        written_data = [
+                self.bend_sensor_value,
+                self.target_pressure_value,
+                self.current_pressure_value,
+                self.ttac3_state
+            ]
+        if None in written_data:
+            return 
+        
         csv_file_number = self.csv_column_count//self.csv_max_column
         file_name = f'sample_{csv_file_number}.csv'
         with open(f'{self.csv_dir_name}/{file_name}', 'a') as f:
@@ -80,6 +91,7 @@ class RecordCSV(Node):
             is_new_file = self.csv_file_number != csv_file_number
             if is_new_file: 
                 writer.writerow([
+                'time_stamp',
                 'bend_sensor_value',
                 'target_pressure_value',
                 'current_pressure_value',
@@ -90,6 +102,7 @@ class RecordCSV(Node):
                 self.csv_file_number = csv_file_number
             
             writer.writerow([
+                time() - self.start_time,
                 self.bend_sensor_value,
                 self.target_pressure_value,
                 self.current_pressure_value,
