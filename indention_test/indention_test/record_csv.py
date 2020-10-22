@@ -76,8 +76,6 @@ class RecordCSV(Node):
         self.ttac3_state = msg.data
 
     def callback_write_csv(self):
-        tdatetime = dt.now()
-        tstr = tdatetime.strftime('%Y%m%d%H%M%S')
         written_data = [
                 self.bend_sensor_value,
                 self.target_pressure_value,
@@ -88,8 +86,9 @@ class RecordCSV(Node):
             return 
         
         csv_file_number = self.csv_column_count//self.csv_max_column
-        file_name = f'width_{self.object_width}_radious_{self.object_radious}_number{csv_file_number}.csv'
-        with open(f'{self.csv_dir_name}/{file_name}', 'a') as f:
+        csv_file_name = f'width_{self.object_width}_radious_{self.object_radious}_number{csv_file_number}.csv'
+        
+        with open(f'{self.csv_dir_name}/{csv_file_name}', 'a') as f:
             writer = csv.writer(f)
 
             is_new_file = self.csv_file_number != csv_file_number
