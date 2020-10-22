@@ -1,4 +1,6 @@
 import os
+import sys
+import argparse
 from time import time
 from pathlib import Path
 from datetime import datetime as dt
@@ -12,18 +14,18 @@ from std_msgs.msg import Int32MultiArray
 from std_msgs.msg import Float32
 
 class RecordCSV(Node):
-    def __init__(self):
+    def __init__(self, object_width, object_radious):
         super().__init__('record_csv')
 
         # Set Bag Dir
-        tdatetime = dt.now()
-        tstr = tdatetime.strftime('%Y%m%d%H%M%S')
-        self.csv_dir_name = f'/home/toshi/dev_ws/csv/indention_test/{tstr}'
+        self.csv_dir_name = f'/home/toshi/dev_ws/csv/indention_test/'
         Path(self.csv_dir_name).mkdir(parents=True)
         self.start_time = time()
         self.csv_column_count = 0
         self.csv_max_column = 1000
         self.csv_file_number = -1
+        self.object_width = object_width
+        self.object_radious = object_radious
 
         self.bend_sensor_value = None
         self.target_pressure_value = None
@@ -74,6 +76,8 @@ class RecordCSV(Node):
         self.ttac3_state = msg.data
 
     def callback_write_csv(self):
+        tdatetime = dt.now()
+        tstr = tdatetime.strftime('%Y%m%d%H%M%S')
         written_data = [
                 self.bend_sensor_value,
                 self.target_pressure_value,
@@ -84,7 +88,7 @@ class RecordCSV(Node):
             return 
         
         csv_file_number = self.csv_column_count//self.csv_max_column
-        file_name = f'sample_{csv_file_number}.csv'
+        file_name = f'width_{self.object_width}_radious_{self.object_radious}_number{csv_file_number}.csv'
         with open(f'{self.csv_dir_name}/{file_name}', 'a') as f:
             writer = csv.writer(f)
 
@@ -114,11 +118,19 @@ class RecordCSV(Node):
 
 
 
-def main():
+def main(argv=sys.argv):
+
+    parser = argparse.ArgumentParser(description='Record CSV (Indention Test)')
+    parser.add_argument('-w', '--width', help='The width of the object')
+    parser.add_argument('-r', '--radious', help='The radious of the object')
+    args = parser.parse_args()
     
     rclpy.init()
     
-    recoder = RecordCSV()
+    recoder = RecordCSV(
+        object_width=args.width,
+        object_radious=args.radious,
+    )
 
     rclpy.spin(recoder)
 
