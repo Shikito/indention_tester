@@ -9,6 +9,7 @@ from std_msgs.msg import Int32MultiArray
 from ttac3_interfaces.srv import TTAC3
 # from indention_test_utils.ttac3_client_node import TTAC3ClientNode
 from yi2016_utils.node_utils import create_thread
+from ros2serial_interfaces.srv import ROS2SerialSrv
 
 class IndentionTester(Node):
     def __init__(self):
@@ -16,7 +17,17 @@ class IndentionTester(Node):
 
         self.cli_ttac3 = self.create_client(
             TTAC3, 'ttac3')
-        self.req = TTAC3.Request()
+        while not self.cli_ttac3.wait_for_service(timeout_sec=2.0):
+            self.get_logger().info('service not available, waiting again...')
+        self.req_ttac3 = TTAC3.Request()
+
+        # Set Target Air Pressure
+        self.cli_target_air_pressure = self.create_client(
+            ROS2SerialSrv, '/terminal/write')
+        while not self.cli_target_air_pressure.wait_for_service(timeout_sec=2.0):
+            self.get_logger().info('service not available, waiting again...')
+        self.req_target_air_pressure = ROS2SerialSrv.Request()
+        
         # Main Loop (by Thread)
         update_period = 0.5
         self.count = 0
@@ -58,17 +69,41 @@ class IndentionTester(Node):
     def update(self):
         home_position = [130, 83, 80]
         indent_position = [130, 83, 85]
-        
-        # self.get_logger().info('on update')
-        if self.count % 2 == 0:
-            self.req.xyz_goal = home_position
-        else:
-            self.req.xyz_goal = indent_position
-        self.get_logger().info(f'Send xyz_goal : {self.req.xyz_goal}')
-        response = self.request_service_sync(
-            self.cli_ttac3, self.req)
-        self.get_logger().info(f'Response : {response.is_success}')
-        self.count += 1
+        target_air_pressure_list = [100, 125, 150, 175, 200]
+
+        trial_num = 3
+        for i in range(trial_num):
+            self.get_logger().info(f'***{i} / {trial_num} Trial ***')
+            for target_air_pressure in target_air_pressure_list:
+
+                # Set target_air_pressure
+                self.get_logger().info(f'Send target_air_pressure : {target_air_pressure}')
+                self.req_target_air_pressure.data = str(target_air_pressure)
+                response = self.request_service_sync(
+                    self.cli_target_air_pressure,
+                    self.req_target_air_pressure
+                )
+                self.get_logger().info(f'Response : {response.success}')
+                
+                # Move To Home Position
+                self.req_ttac3.xyz_goal = home_position
+                self.get_logger().info(f'Send xyz_goal : {self.req_ttac3.xyz_goal}')
+                response = self.request_service_sync(
+                    self.cli_ttac3, self.req_ttac3)
+                self.get_logger().info(f'Response : {response.is_success}')
+                time.sleep(1)
+
+                # Move To Indent Position
+                self.req_ttac3.xyz_goal = indent_position
+                self.get_logger().info(f'Send xyz_goal : {self.req_ttac3.xyz_goal}')
+                response = self.request_service_sync(
+                    self.cli_ttac3, self.req_ttac3)
+                self.get_logger().info(f'Response : {response.is_success}')
+                time.sleep(1)
+
+        while True:
+            self.get_logger().info('Complete Task : Please Press Ctrl-C to End')
+            time.sleep(1)
 
     def request_service_sync(self, client, req):
         future = client.call_async(req)
